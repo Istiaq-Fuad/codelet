@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "462556253124",
+    "project_id": "blog-app-ba239",
+    "storage_bucket": "blog-app-ba239.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462556253124:android:ea438df84518f164883291",
+        "android_client_info": {
+          "package_name": "com.fuad.codelet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXkwIp98l7ZmovEtYpB4RwD3w2XRx7URk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

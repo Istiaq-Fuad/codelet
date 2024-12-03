@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'post_detail_page.dart';
-import 'create_post_page.dart';
 import 'edit_post_page.dart'; // New page for editing posts
 import '../models/post.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;

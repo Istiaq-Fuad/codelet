@@ -29,7 +29,12 @@ class _ManageContentPageState extends State<ManageContentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Manage Your Content"),
+        title: const Text(
+          "Manage Your Content",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: Colors.blueAccent,
         actions: [
           PopupMenuButton<String>(
@@ -64,7 +69,9 @@ class _ManageContentPageState extends State<ManageContentPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("No posts found"));
           }
 
@@ -76,7 +83,8 @@ class _ManageContentPageState extends State<ManageContentPage> {
           if (_filterOption == 'Popular') {
             posts.sort((a, b) => b.likes.length.compareTo(a.likes.length));
           } else if (_filterOption == 'Recent') {
-            posts.sort((a, b) => b.id.compareTo(a.id)); // assuming `id` has a date format
+            posts.sort((a, b) =>
+                b.id.compareTo(a.id)); // assuming `id` has a date format
           }
 
           return ListView.builder(
@@ -88,13 +96,13 @@ class _ManageContentPageState extends State<ManageContentPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          PostDetailPage(postId: post.id),
+                      builder: (context) => PostDetailPage(postId: post.id),
                     ),
                   );
                 },
                 child: Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -128,8 +136,10 @@ class _ManageContentPageState extends State<ManageContentPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              quill.Document.fromJson(post.content).toPlainText(),
-                              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                              quill.Document.fromJson(post.content)
+                                  .toPlainText(),
+                              style: TextStyle(
+                                  fontSize: 16, color: Colors.grey[700]),
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -139,7 +149,8 @@ class _ManageContentPageState extends State<ManageContentPage> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.thumb_up, color: Colors.blueAccent, size: 20),
+                                    const Icon(Icons.thumb_up,
+                                        color: Colors.blueAccent, size: 20),
                                     const SizedBox(width: 4),
                                     Text(
                                       '${post.likes.length} Likes',
@@ -149,7 +160,8 @@ class _ManageContentPageState extends State<ManageContentPage> {
                                 ),
                                 Row(
                                   children: [
-                                    const Icon(Icons.comment, color: Colors.grey, size: 20),
+                                    const Icon(Icons.comment,
+                                        color: Colors.grey, size: 20),
                                     const SizedBox(width: 4),
                                     Text(
                                       '${post.comments.length} Comments',
@@ -164,18 +176,26 @@ class _ManageContentPageState extends State<ManageContentPage> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.blueAccent),
                                   onPressed: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => EditPostPage(postId: post.id, title: post.title, content: post.content, categories: post.categories, imageUrl: post.imageUrl,),
+                                        builder: (context) => EditPostPage(
+                                          postId: post.id,
+                                          title: post.title,
+                                          content: post.content,
+                                          categories: post.categories,
+                                          imageUrl: post.imageUrl,
+                                        ),
                                       ),
                                     );
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.redAccent),
                                   onPressed: () async {
                                     _deletePost(post.id);
                                   },
@@ -193,16 +213,16 @@ class _ManageContentPageState extends State<ManageContentPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blueAccent,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreatePostPage()),
-          );
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Colors.blueAccent,
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => const CreatePostPage()),
+      //     );
+      //   },
+      //   child: const Icon(Icons.add, color: Colors.white),
+      // ),
       backgroundColor: Colors.grey[200],
     );
   }

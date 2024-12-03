@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Blog Posts",
+          "CodeLet",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -101,6 +101,7 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               Container(
+                padding: const EdgeInsets.only(bottom: 12.0),
                 decoration: const BoxDecoration(
                   color: Colors.blueAccent, // Background color
                   shape: BoxShape.circle,

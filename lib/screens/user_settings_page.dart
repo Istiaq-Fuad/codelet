@@ -95,7 +95,12 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("User Settings"),
+        title: const Text(
+          "User Settings",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
@@ -215,7 +220,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                 child: const Text("Save Settings",
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.black,
+                      color: Colors.white,
                     )),
               ),
             ),

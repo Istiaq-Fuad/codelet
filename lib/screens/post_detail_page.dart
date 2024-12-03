@@ -15,7 +15,6 @@ class PostDetailPage extends StatefulWidget {
 
 class _PostDetailPageState extends State<PostDetailPage> {
   final TextEditingController _commentController = TextEditingController();
-  final TextEditingController _replyController = TextEditingController();
   String? replyingToCommentId;
 
   // Cache to store usernames by userId
@@ -49,7 +48,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     });
   }
 
-  // Fetch and cache usernames from Firestore
   Future<String> _getUsername(String userId) async {
     if (_usernamesCache.containsKey(userId)) {
       return _usernamesCache[userId]!;
@@ -63,11 +61,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> addComment(String text, PostModel post) async {
     final newComment = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'userId': FirebaseAuth.instance.currentUser!.uid,
       'text': text,
       'timestamp': DateTime.now().toIso8601String(),
-      'replies': [],
     };
+
     setState(() {
       post.comments.add(newComment);
     });
@@ -79,176 +78,53 @@ class _PostDetailPageState extends State<PostDetailPage> {
     _commentController.clear();
   }
 
-  Future<void> addReply(
-      String text, Map<String, dynamic> comment, PostModel post) async {
-    final reply = {
-      'userId': FirebaseAuth.instance.currentUser!.uid,
-      'text': text,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-    setState(() {
-      comment['replies'].add(reply);
-      replyingToCommentId = null;
-    });
+  Widget _buildComment(PostModel post, Map<String, dynamic> comment,
+      {String? repliedToUsername}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: FutureBuilder<String>(
+        future: _getUsername(comment['userId']),
+        builder: (context, snapshot) {
+          final username = snapshot.data ?? 'Loading...';
 
-    await FirebaseFirestore.instance.collection('posts').doc(post.id).update({
-      'comments': post.comments,
-    });
-
-    _replyController.clear();
-  }
-
-  Widget _buildComment(PostModel post, Map<String, dynamic> comment) {
-    final isReplying = replyingToCommentId == comment['userId'];
-
-    return FutureBuilder<String>(
-      future: _getUsername(comment['userId']),
-      builder: (context, snapshot) {
-        final username = snapshot.data ?? 'Loading...';
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Comment Box
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3), // Shadow position
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Username and Comment Text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        username,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Display Comment or Reply
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (repliedToUsername != null)
+                      TextSpan(
+                        text: '@$repliedToUsername ',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.blueAccent,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            replyingToCommentId = comment['userId'];
-                          });
-                        },
-                        child: const Text(
-                          'Reply',
-                          style: TextStyle(color: Colors.blueAccent),
-                        ),
+                    TextSpan(
+                      text: comment['text'],
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    comment['text'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Display Replies
-            if (comment['replies'] != null && comment['replies'].isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0),
-                child: Column(
-                  children: comment['replies'].map<Widget>((reply) {
-                    return FutureBuilder<String>(
-                      future: _getUsername(reply['userId']),
-                      builder: (context, replySnapshot) {
-                        final replyUsername =
-                            replySnapshot.data ?? 'Loading...';
-
-                        return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4.0),
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                replyUsername,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                reply['text'],
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-
-            // Add Reply TextField if Replying
-            if (isReplying)
-              Padding(
-                padding: const EdgeInsets.only(left: 24.0, top: 8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _replyController,
-                        decoration: InputDecoration(
-                          hintText: 'Write a reply...',
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 10.0,
-                            horizontal: 10.0,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send, color: Colors.blueAccent),
-                      onPressed: () {
-                        addReply(_replyController.text, comment, post);
-                        _replyController
-                            .clear(); // Clear the field after sending
-                      },
                     ),
                   ],
                 ),
               ),
-            const Divider(),
-          ],
-        );
-      },
+              const SizedBox(height: 4),
+              Text(
+                "- $username",
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -256,7 +132,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Post Details"),
+        title: const Text(
+          "Post Details",
+          style: TextStyle(
+            color: Colors.white,
+            // fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: Colors.blueAccent,
       ),
       body: FutureBuilder<PostModel?>(
@@ -322,7 +204,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       Text('${post.likes.length} upvotes'),
                       const SizedBox(width: 16),
                       const Icon(Icons.comment, color: Colors.grey),
-                      Text('${post.comments.length} comments'),
+                      Text('  ${post.comments.length} comments'),
                     ],
                   ),
                   const Divider(),
@@ -337,27 +219,45 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   const SizedBox(height: 8),
                   // Render comments
                   Column(
-                    children: post.comments
-                        .map((comment) => _buildComment(post, comment))
-                        .toList(),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: post.comments.map((comment) {
+                      return _buildComment(post, comment);
+                    }).toList(),
                   ),
                   const SizedBox(height: 16),
                   // Add new comment
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _commentController,
-                          decoration: const InputDecoration(
-                              hintText: 'Write a comment...'),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 5,
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () =>
-                            addComment(_commentController.text, post),
-                      ),
-                    ],
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _commentController,
+                            decoration: const InputDecoration(
+                              hintText: 'Write a comment...',
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon:
+                              const Icon(Icons.send, color: Colors.blueAccent),
+                          onPressed: () =>
+                              addComment(_commentController.text, post),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
